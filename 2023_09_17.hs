@@ -1,6 +1,7 @@
 import System.IO
 import Control.Monad
 -- London to heathrow
+data Lane = A | B deriving (Show, Eq)
 
 data Section = Section {
   divider :: Int
@@ -11,7 +12,7 @@ data Section = Section {
 data Path = Path {
   distance :: Int
   , secNo :: Int
-  , lane :: Char
+  , lane :: Lane
 } deriving (Show)
 
 -- We dont do error handling
@@ -28,14 +29,14 @@ parseInput =  toSections . (0:) . fmap read . lines
 -- [Path is a stack for ease]
 predicate :: Path -> Section -> Path
 predicate Path{ distance = 0 } section 
-  | toA section > toB section = Path{ distance = toB section, lane = 'B', secNo = 0 }
-  | otherwise = Path{ distance = toA section, lane = 'A', secNo = 0 }
+  | toA section > toB section = Path{ distance = toB section, lane = B, secNo = 0 }
+  | otherwise = Path{ distance = toA section, lane = A, secNo = 0 }
 
 predicate p section
-  | prevLane == 'A' && toAVal <= toBVal + dividerVal = Path{ distance = prevDistance + toAVal, lane = 'A', secNo = prevSecNo + 1 }
-  | prevLane == 'A' && toAVal > toBVal + dividerVal  = Path{ distance = prevDistance + toBVal + dividerVal, lane = 'B', secNo = prevSecNo + 1 }
-  | prevLane == 'B' && toBVal <= toAVal + dividerVal = Path{ distance = prevDistance + toBVal, lane = 'B', secNo = prevSecNo + 1 }
-  | prevLane == 'B' && toBVal > toAVal + dividerVal  = Path{ distance = prevDistance + toAVal + dividerVal, lane = 'A', secNo = prevSecNo + 1 }
+  | prevLane == A && toAVal <= toBVal + dividerVal = Path{ distance = prevDistance + toAVal, lane = A, secNo = prevSecNo + 1 }
+  | prevLane == A && toAVal > toBVal + dividerVal  = Path{ distance = prevDistance + toBVal + dividerVal, lane = B, secNo = prevSecNo + 1 }
+  | prevLane == B && toBVal <= toAVal + dividerVal = Path{ distance = prevDistance + toBVal, lane = B, secNo = prevSecNo + 1 }
+  | prevLane == B && toBVal > toAVal + dividerVal  = Path{ distance = prevDistance + toAVal + dividerVal, lane = B, secNo = prevSecNo + 1 }
   where 
     prevDistance = distance p
     prevSecNo = secNo p
@@ -46,7 +47,7 @@ predicate p section
 
 -- scanl (b -> a -> b) -> b -> [a] -> [b]
 compute :: [Section] -> [Path]
-compute = scanl predicate Path { distance = 0, lane = 'A', secNo = 0 }
+compute = scanl predicate Path { distance = 0, lane = A, secNo = 0 }
 
 main :: IO ()
 main = do
