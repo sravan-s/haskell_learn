@@ -56,3 +56,4 @@ main = do
   let output = compute $ parseInput contents
   -- we can pretty-print path from output list :)
   print output
+
